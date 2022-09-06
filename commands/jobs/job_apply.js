@@ -1,5 +1,12 @@
 const { SlashCommandBuilder, EmbedBuilder, Embed } = require('discord.js');
 
+var admin = require("firebase-admin");
+// var serviceAccount = require('./key.json');
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount)
+// });
+const db = admin.firestore();
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('job_apply')
@@ -23,8 +30,17 @@ module.exports = {
   },
   async execute(interaction, client) {
     const job = interaction.options.getString('job')
+    try {
+      db.collection('users').doc(interaction.member.user.id).set({
+        job: job
+      })
+    }
+    catch (err) {
+      console.error(err)
+    }
+    
     await interaction.reply({
-      content: `Successfully applied for ${job}!`
+      content: `Successfully applied for ${job}. Remember to work, or else you will get fired!`
     })
   }
 }
