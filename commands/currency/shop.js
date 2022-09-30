@@ -1,10 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, Embed } = require('discord.js');
 
 var admin = require("firebase-admin");
-// var serviceAccount = require('../../key.json');
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount)
-// });
 const db = admin.firestore();
 
 module.exports = {
@@ -13,6 +9,7 @@ module.exports = {
     .setDescription('See what you can buy with your lemons!'),
     // .setStringOption(option)
   async execute(interaction, client) {
+    
     const lemons = db.collection('users').doc(interaction.member.user.id).get('lemons')
     if (lemons.exists){
       var amount = lemons
@@ -20,9 +17,16 @@ module.exports = {
     else{
       var amount = 0
       try {
-        db.collection('users').doc(interaction.member.user.id).set({
-          lemons: 0
-        })
+        if (db.collection('users').doc(interaction.member.user.id).get('lumons') == null) {
+          console.log('oof')
+          db.collection('users').doc(interaction.member.user.id).push({
+            lemons: 0
+          })
+        } else {
+          db.collection('users').doc(interaction.member.user.id).update({
+            lemons: 0
+          })
+        }
       }
       catch (err) {
         console.error(err)
@@ -38,7 +42,9 @@ module.exports = {
         { name: `Junk`, value: `3 🍋 each`},
         { name: ` Bacteria`, value: `10 🍋 each`},
       )
-      .setFooter(`You have ${amount} 🍋!`)
+      .setFooter({
+        text: `You have ${amount.toString()} 🍋`,
+      })
 
     await interaction.reply({
       embeds: [embed]

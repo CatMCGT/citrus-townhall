@@ -1,10 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, Embed } = require('discord.js');
 
 var admin = require("firebase-admin");
-// var serviceAccount = require('./key.json');
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount)
-// });
 const db = admin.firestore();
 
 module.exports = {
@@ -31,9 +27,15 @@ module.exports = {
   async execute(interaction, client) {
     const job = interaction.options.getString('job')
     try {
-      db.collection('users').doc(interaction.member.user.id).set({
-        job: job
-      })
+      if (db.collection('users').doc(interaction.member.user.id).get('job') == null) {
+        db.collection('users').doc(interaction.member.user.id).push({
+          job: job
+        })
+      } else {
+        db.collection('users').doc(interaction.member.user.id).update({
+          job: job
+        })
+      }
     }
     catch (err) {
       console.error(err)
